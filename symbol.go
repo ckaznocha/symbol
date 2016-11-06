@@ -1,10 +1,7 @@
 // Package symbol provides a Go implementation of JavaScript style symbols (atoms).
 package symbol
 
-import (
-	"sync"
-	"unsafe"
-)
+import "sync"
 
 var registry = &struct {
 	sync.RWMutex
@@ -16,17 +13,17 @@ var registry = &struct {
 }
 
 // A Symbol is a unique and immutable data type.
-type Symbol struct{ pntr unsafe.Pointer }
+type Symbol struct{ *string }
 
 // New creates a new unique symbol. Description is a string which is useful
 // for debugging but not to access the symbol itself.
 func New(description string) Symbol {
-	return Symbol{pntr: unsafe.Pointer(&description)}
+	return Symbol{&description}
 }
 
 // String method returns a string representing the specified Symbol.
 func (s Symbol) String() string {
-	return "symbol.New(" + *(*string)(s.pntr) + ")"
+	return "symbol.New(" + *s.string + ")"
 }
 
 // For searches for existing symbols in a runtime-wide symbol registry with the
