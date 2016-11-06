@@ -6,10 +6,10 @@ import "sync"
 var registry = &struct {
 	sync.RWMutex
 	keysToSymbols map[string]Symbol
-	symbolKeys    map[Symbol]string
+	symbolKeys    map[*string]struct{}
 }{
 	keysToSymbols: map[string]Symbol{},
-	symbolKeys:    map[Symbol]string{},
+	symbolKeys:    map[*string]struct{}{},
 }
 
 // A Symbol is a unique and immutable data type.
@@ -32,7 +32,7 @@ func For(key string) Symbol {
 	if !ok {
 		sym = New(key)
 		registry.Lock()
-		registry.keysToSymbols[key], registry.symbolKeys[sym] = sym, key
+		registry.keysToSymbols[key], registry.symbolKeys[sym.string] = sym, struct{}{}
 		registry.Unlock()
 	}
 	return sym
@@ -43,7 +43,10 @@ func For(key string) Symbol {
 // and false.
 func KeyFor(sym Symbol) (string, bool) {
 	registry.RLock()
-	key, ok := registry.symbolKeys[sym]
+	_, ok := registry.symbolKeys[sym.string]
 	registry.RUnlock()
-	return key, ok
+	if !ok {
+		sym.string = new(string)
+	}
+	return *sym.string, ok
 }
