@@ -5,11 +5,11 @@ import "sync"
 
 var registry = &struct {
 	sync.RWMutex
-	namesToSymbols map[string]Symbol
-	symbolsToNames map[Symbol]string
+	keysToSymbols map[string]Symbol
+	symbolKeys    map[Symbol]string
 }{
-	namesToSymbols: map[string]Symbol{},
-	symbolsToNames: map[Symbol]string{},
+	keysToSymbols: map[string]Symbol{},
+	symbolKeys:    map[Symbol]string{},
 }
 
 // A Symbol is a unique and immutable data type.
@@ -17,26 +17,22 @@ type Symbol struct{ *string }
 
 // New creates a new unique symbol. Description is a string which is useful
 // for debugging but not to access the symbol itself.
-func New(description string) Symbol {
-	return Symbol{&description}
-}
+func New(description string) Symbol { return Symbol{&description} }
 
 // String method returns a string representing the specified Symbol.
-func (s Symbol) String() string {
-	return "symbol.New(" + *s.string + ")"
-}
+func (s Symbol) String() string { return "symbol.New(" + *s.string + ")" }
 
 // For searches for existing symbols in a runtime-wide symbol registry with the
 // given key and returns it if found. Otherwise a new symbol gets created in the
 // global symbol registry with this key.
 func For(key string) Symbol {
 	registry.RLock()
-	sym, ok := registry.namesToSymbols[key]
+	sym, ok := registry.keysToSymbols[key]
 	registry.RUnlock()
 	if !ok {
 		sym = New(key)
 		registry.Lock()
-		registry.namesToSymbols[key], registry.symbolsToNames[sym] = sym, key
+		registry.keysToSymbols[key], registry.symbolKeys[sym] = sym, key
 		registry.Unlock()
 	}
 	return sym
@@ -47,7 +43,7 @@ func For(key string) Symbol {
 // and false.
 func KeyFor(sym Symbol) (string, bool) {
 	registry.RLock()
-	key, ok := registry.symbolsToNames[sym]
+	key, ok := registry.symbolKeys[sym]
 	registry.RUnlock()
 	return key, ok
 }

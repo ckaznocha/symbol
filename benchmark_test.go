@@ -31,23 +31,22 @@ func BenchmarkSymbol_String(b *testing.B) {
 }
 
 func BenchmarkFor(b *testing.B) {
-	sym := symbol.For("foo")
 	for i := 0; i < b.N; i++ {
 		got := symbol.For("foo")
-		if sym != got {
-			b.Errorf("For(\"foo\") = %+v, want %+v", got, sym)
+		got2 := symbol.For("foo")
+		if got != got2 {
+			b.Errorf("For(\"foo\") = %+v, want %+v", got, got2)
 		}
-		if sym == symbol.For(strconv.Itoa(i)) {
-			b.Errorf("For(\"%d\") = %+v, want a unique symbol", i, sym)
+		if got == symbol.For(strconv.Itoa(i)) {
+			b.Errorf("For(\"%d\") = %+v, want a unique symbol", i, got)
 		}
 	}
 }
 func BenchmarkKeyFor(b *testing.B) {
-	sym := symbol.For("foo")
 	for i := 0; i < b.N; i++ {
-		v, ok := symbol.KeyFor(sym)
+		v, ok := symbol.KeyFor(symbol.For(strconv.Itoa(i)))
 		if !ok {
-			b.Errorf("KeyFor(%+v) = %q, want \"foo\"", sym, v)
+			b.Errorf("KeyFor(symbol.For(%d)) = %q, want %q", i, v, i)
 		}
 		v, ok = symbol.KeyFor(symbol.New(""))
 		if ok {

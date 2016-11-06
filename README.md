@@ -27,8 +27,7 @@ false.
 #### type Symbol
 
 ```go
-type Symbol struct {
-}
+type Symbol struct {}
 ```
 
 A Symbol is a unique and immutable data type.
